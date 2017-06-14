@@ -168,8 +168,8 @@ class LilyPondLexer(RegexLexer):
             (r'\#\}', Punctuation, '#pop'),
 
             # everything else
-            (r'(\#|\/|\{|\}|\(|\)|\[|\]\<\>)', Punctuation),
-            (r'(\.|\,|\'|\`|\-|\_|\|)', Punctuation),
+            (r'(\#|\/|\{|\}|\(|\)|\[|\]|\<|\>)', Punctuation),
+            (r'(\.|\,|\'|\`|\^|\-|\_|\|)', Punctuation),
             (r'\d+', Number.Integer),
             (r'\d+\.\d+', Number.Float),
             (r'(\=|\:|\:\:)', Operator)
