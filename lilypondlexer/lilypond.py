@@ -145,7 +145,7 @@ class LilyPondLexer(RegexLexer):
             (r'[a-z][a-z]+', Text),
 
             # notes (pitches)
-            (r'[a-g]+?', Name.Builtin),
+            (r'[a-grRsq]+?', Name.Builtin),
 
             # push scheme mode
             # ... this must stay before string/token below ...
