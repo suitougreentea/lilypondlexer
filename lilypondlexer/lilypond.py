@@ -135,7 +135,11 @@ class LilyPondLexer(RegexLexer):
             (r'(\\)(%s)(\s+|\\)' % '|'.join(builtins), Name.Builtin),
             (r'(%s)(\s+|\\)' % '|'.join(contexts), Name.Constant),
             (r'\"(%s)\"' % '|'.join(engravers_and_performers), Name.Constant),
-            (r'\\[a-zA-Z]*\s*', Name.Function),
+            (r'\\[^\s0-9]*\s*', Name.Function),
+
+            # notes (pitches)
+            (r'[a-grRsq](is|isis|es|eses)?(?=[^A-Za-z])', Name.Builtin),
+            (r'[rRsq](?=[^A-Za-z])', Name.Builtin),
 
             # uncap/capitalized symbols
             (r'[a-zA-Z][a-zA-Z]+\s*', Keyword),
@@ -143,9 +147,6 @@ class LilyPondLexer(RegexLexer):
 
             # other non-strings
             (r'[a-z][a-z]+', Text),
-
-            # notes (pitches)
-            (r'[a-grRsq]+?', Name.Builtin),
 
             # push scheme mode
             # ... this must stay before string/token below ...
@@ -168,7 +169,11 @@ class LilyPondLexer(RegexLexer):
             (r'\#\}', Punctuation, '#pop'),
 
             # everything else
-            (r'(\#|\/|\{|\}|\(|\)|\[|\]|\<|\>|\~)', Punctuation),
+            (r'[-^_][->.!^_+]', Operator),
+            (r'[-^_]?[()\[\]~]', Operator),
+            (r'[-^_]?(\\\(|\\\))', Operator),
+            (r'[-^_]?(?=\\[^\s0-9])', Operator),
+            (r'(\#|\/|\{|\}|\<|\>|\~)', Punctuation),
             (r'(\.|\,|\'|\`|\^|\-|\_|\|)', Punctuation),
             (r'\d+', Number.Integer),
             (r'\d+\.\d+', Number.Float),
