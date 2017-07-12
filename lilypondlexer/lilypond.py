@@ -122,6 +122,10 @@ class LilyPondLexer(RegexLexer):
         'Tuplet_engraver', 'Tweak_engraver',  'Vaticana_ligature_engraver',
         'Vertical_align_engraver', 'Volta_engraver')
 
+    pitches = r'[A-Za-z]'
+    octaves = r'(\'+|,+)'
+    durations = r'(1|2|4|8|16|32|64|128|256)'
+
     tokens = {
 
         'root': [
@@ -131,21 +135,24 @@ class LilyPondLexer(RegexLexer):
             (r'%\{', Comment.Multiline, 'comment'),
             (r'%.*$', Comment.Single),
 
+            (r'\{', Punctuation, 'progressive-music-expression'),
+            (r'<<', Punctuation, 'polyphony-music-expression'),
+
             # \functions
-            (r'(\\)(%s)(\s+|\\)' % '|'.join(builtins), Name.Builtin),
-            (r'(%s)(\s+|\\)' % '|'.join(contexts), Name.Constant),
-            (r'\"(%s)\"' % '|'.join(engravers_and_performers), Name.Constant),
-            (r'\\[a-zA-Z]*\s*', Name.Function),
+            ## (r'(\\)(%s)(\s+|\\)' % '|'.join(builtins), Name.Builtin),
+            ## (r'(%s)(\s+|\\)' % '|'.join(contexts), Name.Constant),
+            ## (r'\"(%s)\"' % '|'.join(engravers_and_performers), Name.Constant),
+            ## (r'\\[a-zA-Z]*\s*', Name.Function),
 
             # uncap/capitalized symbols
-            (r'[a-zA-Z][a-zA-Z]+\s*', Keyword),
-            (r'(\")(.+?)(\")', String.Single),
+            ## (r'[a-zA-Z][a-zA-Z]+\s*', Keyword),
+            ## (r'(\")(.+?)(\")', String.Single),
 
             # other non-strings
-            (r'[a-z][a-z]+', Text),
+            ## (r'[a-z][a-z]+', Text),
 
             # notes (pitches)
-            (r'[a-grRsq]+?', Name.Builtin),
+            ## (r'[a-grRsq]+?', Name.Builtin),
 
             # push scheme mode
             # ... this must stay before string/token below ...
@@ -168,11 +175,39 @@ class LilyPondLexer(RegexLexer):
             (r'\#\}', Punctuation, '#pop'),
 
             # everything else
-            (r'(\#|\/|\{|\}|\(|\)|\[|\]|\<|\>|\~)', Punctuation),
-            (r'(\.|\,|\'|\`|\^|\-|\_|\|)', Punctuation),
-            (r'\d+', Number.Integer),
-            (r'\d+\.\d+', Number.Float),
-            (r'(\=|\:|\:\:)', Operator)
+            ## (r'(\#|\/|\{|\}|\(|\)|\[|\]|\<|\>|\~)', Punctuation),
+            ## (r'(\.|\,|\'|\`|\^|\-|\_|\|)', Punctuation),
+            ## (r'\d+', Number.Integer),
+            ## (r'\d+\.\d+', Number.Float),
+            ## (r'(\=|\:|\:\:)', Operator)
+        ],
+
+        'music-expression': [
+            (r'\s+', Text),
+            (r'(%s+)%s?%s?' % (pitches, octaves, durations), bygroups(Text, Number.Integer), 'articulation'),
+        ],
+
+        'progressive-music-expression': [
+            include('music-expression'),
+            (r'\|', Punctuation),
+            (r'\}', Punctuation, '#pop'),
+            (r'\{', Punctuation, 'progressive-music-expression'),
+            (r'<<', Punctuation, 'polyphony-music-expression'),
+        ],
+
+        'polyphony-music-expression': [
+            include('music-expression'),
+            (r'>>', Punctuation, '#pop'),
+            (r'\{', Punctuation, 'progressive-music-expression'),
+            (r'<<', Punctuation, 'polyphony-music-expression'),
+        ],
+
+        'articulation': [
+            (r'\s+', Text),
+            (r'[-^_][->.!^_+]', Operator),
+            (r'[-^_]?[()\\(\\)\[\]~]', Operator),
+            (r'[-^_]?\\[A-Za-z<>!]+', Operator),
+            default('#pop')
         ],
 
         'comment': [
